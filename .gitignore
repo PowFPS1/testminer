@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+_tmp_win/
+_tmp_uwp/
+.env

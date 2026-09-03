@@ -1,0 +1,250 @@
+name: Commit Diff Comment
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  comment-diff:
+    permissions: write-all
+    if: github.event.deleted == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build diff summary
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          AFTER="${{ github.event.after }}"
+          BEFORE="${{ github.event.before }}"
+          ZERO="0000000000000000000000000000000000000000"
+
+          if [ "$BEFORE" = "$ZERO" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            BEFORE="$(git hash-object -t tree /dev/null)"
+          fi
+
+          echo "before=$BEFORE" >> "$GITHUB_OUTPUT"
+          echo "after=$AFTER"   >> "$GITHUB_OUTPUT"
+
+          NAME_STATUS="$(git diff --no-renames --name-status "$BEFORE" "$AFTER")"
+
+          if [ -z "$NAME_STATUS" ]; then
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "has_diff=true" >> "$GITHUB_OUTPUT"
+
+          : > added.txt
+          : > removed.txt
+          : > modified.txt
+
+          while IFS=$'\t' read -r status path; do
+            case "$status" in
+              A) echo "$path" >> added.txt   ;;
+              D) echo "$path" >> removed.txt ;;
+              *) echo "$path" >> modified.txt ;;
+            esac
+          done <<< "$NAME_STATUS"
+
+      - name: Post commit comments
+        if: steps.diff.outputs.has_diff == 'true'
+        uses: actions/github-script@v7
+        env:
+          DIFF_BEFORE: ${{ steps.diff.outputs.before }}
+          DIFF_AFTER:  ${{ steps.diff.outputs.after }}
+        with:
+          script: |
+            const fs = require('fs');
+            const crypto = require('crypto');
+            const { execFileSync } = require('child_process');
+
+            const MAX_BYTES = 60000;
+            const MAX_INLINE_KEYS = 200;
+
+            const BEFORE = process.env.DIFF_BEFORE;
+            const AFTER  = process.env.DIFF_AFTER;
+
+            const readLines = (file) =>
+              fs.existsSync(file)
+                ? fs.readFileSync(file, 'utf8').split('\n').map(s => s.trim()).filter(Boolean)
+                : [];
+
+            const truncate = (text) => {
+              const buf = Buffer.from(text, 'utf8');
+              if (buf.length <= MAX_BYTES) return text;
+              return buf.subarray(0, MAX_BYTES).toString('utf8') + '\n\n... (truncated)';
+            };
+
+            const postComment = (body) =>
+              github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                commit_sha: context.sha,
+                body: truncate(body),
+              });
+
+            const added    = readLines('added.txt');
+            const removed  = readLines('removed.txt');
+            const modified = readLines('modified.txt');
+
+            const isLocaleFile = (f) =>
+              /^([^/]+\/)?(?:InExperience|UniversalApp)\/Locales\/(?:[^/]+\/)*[a-z]{2}(-[a-z0-9]{2,4})?\.csv$/i.test(f);
+
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`;
+            const diffLink  = (file) =>
+              `${commitUrl}#diff-${crypto.createHash('sha256').update(file).digest('hex')}`;
+
+            const readAtRef = (ref, path) => {
+              try {
+                return execFileSync('git', ['show', `${ref}:${path}`], {
+                  encoding: 'utf8',
+                  maxBuffer: 1024 * 1024 * 100,
+                });
+              } catch {
+                return null;
+              }
+            };
+
+            const parseCsvRows = (text) => {
+              const rows = [];
+              let row = [], field = '', inQuotes = false;
+              for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQuotes) {
+                  if (c === '"') {
+                    if (text[i+1] === '"') { field += '"'; i++; }
+                    else inQuotes = false;
+                  } else { field += c; }
+                } else if (c === '"') {
+                  inQuotes = true;
+                } else if (c === ',') {
+                  row.push(field); field = '';
+                } else if (c === '\r') {
+                  // skip
+                } else if (c === '\n') {
+                  row.push(field); field = '';
+                  rows.push(row); row = [];
+                } else { field += c; }
+              }
+              if (field.length || row.length) { row.push(field); rows.push(row); }
+              return rows;
+            };
+
+            const parseKeyValueCsv = (text) => {
+              const map = new Map();
+              if (!text) return map;
+              const rows = parseCsvRows(text);
+              for (let i = 1; i < rows.length; i++) {
+                const [key, value] = rows[i];
+                if (key === undefined) continue;
+                map.set(key, value ?? '');
+              }
+              return map;
+            };
+
+            const sanitize = (s) =>
+              String(s).replace(/\r\n|\r|\n/g, '⏎ ').replace(/`{3,}/g, m => m.replace(/`/g, '´'));
+
+            const diffCsv = (beforeText, afterText) => {
+              const before = parseKeyValueCsv(beforeText);
+              const after  = parseKeyValueCsv(afterText);
+              const addedKeys   = [];
+              const removedKeys = [];
+              const changedKeys = [];
+              for (const [k, v] of after) {
+                if (!before.has(k)) addedKeys.push(k);
+                else if (before.get(k) !== v) changedKeys.push(k);
+              }
+              for (const k of before.keys()) {
+                if (!after.has(k)) removedKeys.push(k);
+              }
+              addedKeys.sort(); removedKeys.sort(); changedKeys.sort();
+              return { before, after, addedKeys, removedKeys, changedKeys };
+            };
+
+            const formatCsvDiff = (beforeText, afterText) => {
+              const { before, after, addedKeys, removedKeys, changedKeys } = diffCsv(beforeText, afterText);
+              if (!addedKeys.length && !removedKeys.length && !changedKeys.length) return null;
+
+              const lines = [];
+              for (const k of addedKeys)   lines.push(`+ ${sanitize(k)} = ${sanitize(after.get(k))}`);
+              for (const k of removedKeys) lines.push(`- ${sanitize(k)} = ${sanitize(before.get(k))}`);
+              for (const k of changedKeys) lines.push(`~ ${sanitize(k)}: ${sanitize(before.get(k))} → ${sanitize(after.get(k))}`);
+
+              return {
+                summary: `${addedKeys.length} added, ${removedKeys.length} removed, ${changedKeys.length} changed`,
+                body: lines.join('\n'),
+                keyCount: addedKeys.length + removedKeys.length + changedKeys.length,
+              };
+            };
+
+            const buildLocalesSection = (files) => {
+              const localeFiles = files.filter(isLocaleFile).sort();
+              if (!localeFiles.length) return '';
+
+              const inlineBlocks = [];
+              const linkOnly     = [];
+
+              for (const f of localeFiles) {
+                const diff = formatCsvDiff(readAtRef(BEFORE, f), readAtRef(AFTER, f));
+                if (!diff) continue;
+
+                const block =
+                  `<details>\n<summary>\`${f}\` — ${diff.summary}</summary>\n\n` +
+                  '```diff\n' + diff.body + '\n```\n</details>\n';
+
+                if (diff.keyCount <= MAX_INLINE_KEYS && Buffer.byteLength(block, 'utf8') <= MAX_BYTES) {
+                  inlineBlocks.push(block);
+                } else {
+                  linkOnly.push(f);
+                }
+              }
+
+              let section = '';
+              if (inlineBlocks.length)
+                section += `### Locale diffs\n\n${inlineBlocks.join('\n')}\n`;
+              if (linkOnly.length) {
+                const links = linkOnly.map(f => `- [\`${f}\`](${diffLink(f)})`).join('\n');
+                section += `### Locale diffs (too large to inline)\n${links}\n\n`;
+              }
+              return section;
+            };
+
+            const appOf = (path) => (path.includes('/') ? path.split('/')[0] : 'Other');
+
+            const groups = new Map();
+            const groupFor = (app) => {
+              if (!groups.has(app)) groups.set(app, { added: [], removed: [], modified: [] });
+              return groups.get(app);
+            };
+            for (const f of added)    groupFor(appOf(f)).added.push(f);
+            for (const f of removed)  groupFor(appOf(f)).removed.push(f);
+            for (const f of modified) groupFor(appOf(f)).modified.push(f);
+
+            const apps = [...groups.keys()].sort((a, b) =>
+              a === 'Other' ? 1 : b === 'Other' ? -1 : a.localeCompare(b)
+            );
+
+            for (const app of apps) {
+              const g = groups.get(app);
+              const localesSection = buildLocalesSection([...g.added, ...g.removed, ...g.modified]);
+
+              const body =
+                `## ${app}\n\n` +
+                `**${g.added.length} added, ${g.removed.length} removed, ${g.modified.length} modified.** ` +
+                `[View full diff](${commitUrl})\n\n` +
+                localesSection;
+
+              await postComment(body.trim());
+            }

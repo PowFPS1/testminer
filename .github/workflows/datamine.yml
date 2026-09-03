@@ -1,0 +1,146 @@
+name: Datamine
+
+on:
+  schedule:
+    # Runs every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  datamine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── 1. Checkout the repo ────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Set up Python ────────────────────────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # ── 3. Install dependencies ─────────────────────────────────────────────
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      # ── 4. Check Roblox version ─────────────────────────────────────────────
+      - name: Check Roblox version
+        id: version_check
+        run: |
+          WIN_VER=$(curl -sf "https://clientsettings.roblox.com/v2/client-version/WindowsPlayer" | python3 -c "import sys,json; print(json.load(sys.stdin)['clientVersionUpload'])")
+          LAST_VER=$(cat last_version.txt 2>/dev/null || echo "")
+          echo "win_version=$WIN_VER" >> $GITHUB_OUTPUT
+          echo "last_version=$LAST_VER" >> $GITHUB_OUTPUT
+          if [ "$WIN_VER" != "$LAST_VER" ]; then
+            echo "is_new=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_new=false" >> $GITHUB_OUTPUT
+          fi
+          echo "WindowsPlayer: $WIN_VER (last: $LAST_VER)"
+
+      # ── 5. Run extractor (only on new version) ──────────────────────────────
+      - name: Extract Roblox files
+        if: steps.version_check.outputs.is_new == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python scripts/extractor.py . 2>&1
+        continue-on-error: false
+
+      # ── 6. Run web JS scraper (always — catches web changes without client update) ──
+      - name: Scrape web JS bundles
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python - <<'EOF'
+          import sys, os, json
+          sys.path.insert(0, "scripts")
+          from extractor import scrape_web_js, load_js_state, save_js_state
+          changes = scrape_web_js("JS")
+          with open("/tmp/js_changes.json", "w") as f:
+              json.dump([{"url": u, "type": t, "path": p} for u, t, p in changes], f)
+          print(f"JS changes: {len(changes)}")
+          EOF
+        continue-on-error: true
+
+      # ── 7. Send Discord notification (new version) ──────────────────────────
+      - name: Notify Discord — new version
+        if: steps.version_check.outputs.is_new == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          UWP_VER=$(curl -sf "https://clientsettings.roblox.com/v2/client-version/WindowsUniversal" | python3 -c "import sys,json; print(json.load(sys.stdin).get('clientVersionUpload','unknown'))" 2>/dev/null || echo "unknown")
+          python scripts/notifier.py new_version \
+            "${{ steps.version_check.outputs.win_version }}" \
+            "${{ steps.version_check.outputs.last_version }}" \
+            "$UWP_VER"
+
+      # ── 8. Count changes for summary ────────────────────────────────────────
+      - name: Count git changes
+        if: steps.version_check.outputs.is_new == 'true'
+        id: count_changes
+        run: |
+          git add -A
+          ADDED=$(git diff --cached --name-only --diff-filter=A | wc -l | tr -d ' ')
+          REMOVED=$(git diff --cached --name-only --diff-filter=D | wc -l | tr -d ' ')
+          MODIFIED=$(git diff --cached --name-only --diff-filter=M | wc -l | tr -d ' ')
+          JS_CHANGES=$(python3 -c "import json; d=json.load(open('/tmp/js_changes.json')); print(len(d))" 2>/dev/null || echo "0")
+          echo "added=$ADDED"     >> $GITHUB_OUTPUT
+          echo "removed=$REMOVED" >> $GITHUB_OUTPUT
+          echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
+          echo "js_changes=$JS_CHANGES" >> $GITHUB_OUTPUT
+          echo "Added: $ADDED, Removed: $REMOVED, Modified: $MODIFIED, JS: $JS_CHANGES"
+
+      # ── 9. Commit and push ──────────────────────────────────────────────────
+      - name: Commit and push
+        if: steps.version_check.outputs.is_new == 'true'
+        run: |
+          git config user.name  "testminer-bot"
+          git config user.email "testminer-bot@users.noreply.github.com"
+          git add -A
+          # Only commit if there are actual changes
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "${{ steps.version_check.outputs.win_version }}"
+            git push
+          fi
+
+      # ── 9b. Also commit JS changes even without version change ───────────────
+      - name: Commit JS-only changes
+        if: steps.version_check.outputs.is_new == 'false'
+        run: |
+          git config user.name  "testminer-bot"
+          git config user.email "testminer-bot@users.noreply.github.com"
+          git add JS/ js_bundle_state.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No JS changes."
+          else
+            git commit -m "web: JS bundle updates"
+            git push
+          fi
+
+      # ── 10. Send summary to Discord ─────────────────────────────────────────
+      - name: Notify Discord — summary
+        if: steps.version_check.outputs.is_new == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          REPO_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+          python scripts/notifier.py summary \
+            "${{ steps.version_check.outputs.win_version }}" \
+            "${{ steps.count_changes.outputs.added }}" \
+            "${{ steps.count_changes.outputs.removed }}" \
+            "${{ steps.count_changes.outputs.modified }}" \
+            "${{ steps.count_changes.outputs.js_changes }}" \
+            "$REPO_URL"
