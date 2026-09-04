@@ -1,0 +1,760 @@
+{
+    "platform": "pc",
+    "atlas": {
+        "pc": {
+            "sliceSize": 512,
+            "width": 2048,
+            "height": 2048,
+            "tileSize": 128,
+            "tileCount": 7,
+            "borderSize": 16
+        }
+    },
+    "globalTransition": {
+        "noiseSize":9.01,
+        "fractalDetail":4.69,
+        "noiseDetail":0.361,
+        "edgeDissolve":2.099,
+        "turbulence": 4
+    },
+    "materials": [
+        {
+            "name": "air",
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "water",
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "grass",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":3.717,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.032,
+                    "max":0.307,
+                    "scale":0.602
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":5,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.195,
+                    "max":0.418,
+                    "scale":0.611
+                }
+            },
+            "texture_bottom": {
+                "tiling":0.5,
+                "detiling":2.221,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.467,
+                    "max":0.551,
+                    "scale":0.93
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "slate",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":1.292,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0,
+                    "max":0.483,
+                    "scale":1
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":2.221,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.398,
+                    "max":0.737,
+                    "scale":0.75
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "concrete",
+            "type": "hard",
+            "texture": {
+                "tiling":0.5,
+                "detiling":3.134,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.12,
+                    "max":0.402,
+                    "scale":0.583
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "brick",
+            "type": "hard",
+            "texture": {
+                "tiling":0.5,
+                "detiling":1,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.133,
+                    "max":0.62,
+                    "scale":0.263
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "sand",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":3.792,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":-0.296,
+                    "max":0.797,
+                    "scale":0.72
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":10,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.377,
+                    "max":0.744,
+                    "scale":0.527
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "woodplanks",
+            "type": "hard",
+            "texture": {
+                "tiling":0.5,
+                "detiling":1,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.456,
+                    "max":0.578,
+                    "scale":0.059
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "rock",
+            "type": "hardsoft",
+            "texture": {
+                "tiling":0.5,
+                "detiling":1.73,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":-0.096,
+                    "max":0.296,
+                    "scale":0.518
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "glacier",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":6,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":-0.079,
+                    "max":0.409,
+                    "scale":0.801
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":6,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.314,
+                    "max":0.595,
+                    "scale":0.629
+                }
+            },
+            "texture_bottom": {
+                "tiling":0.5,
+                "detiling":6,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.319,
+                    "max":0.828,
+                    "scale":0.662
+                }
+            },
+            "transition": {
+                "underlayReveal":0.519,
+                "materialEdgeBlur":0,
+                "noiseSize":10,
+                "fractalDetail":1.261,
+                "noiseDetail":0.4,
+                "turbulence": 1,
+                "dominance":0.802,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "snow",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":2.73,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":-0.451,
+                    "max":0.6,
+                    "scale":1
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":3,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.381,
+                    "max":0.541,
+                    "scale":0.953
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "sandstone",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":7.222,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.365,
+                    "max":0.6,
+                    "scale":0.625
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":2.221,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.211,
+                    "max":0.838,
+                    "scale":0.768
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "mud",
+            "texture": {
+                "tiling":0.5,
+                "detiling":1.299,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.12,
+                    "max":0.787,
+                    "scale":0.493
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "basalt",
+            "type": "hardsoft",
+            "texture": {
+                "tiling":0.5,
+                "detiling":1,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.25,
+                    "max":0.515,
+                    "scale":0.347
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "ground",
+            "texture": {
+                "tiling":0.5,
+                "detiling":2.789,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.104,
+                    "max":0.643,
+                    "scale":0.705
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "crackedlava",
+            "texture": {
+                "tiling":0.5,
+                "detiling":2,
+                "hasEmissiveMask": true,
+                "emissiveStrength":2,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.551,
+                    "max":0.838,
+                    "scale":0.3
+                }
+            },
+            "transition": {
+                "underlayReveal":0.142,
+                "materialEdgeBlur":0.173,
+                "noiseSize":3.331,
+                "fractalDetail":0.107,
+                "noiseDetail":0.671,
+                "turbulence": 3,
+                "dominance":0.899,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "asphalt",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":2.898,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.6,
+                    "max":1.059,
+                    "scale":0.421
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":2.898,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":-0.004,
+                    "max":0.286,
+                    "scale":0.444
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "cobblestone",
+            "type": "hardsoft",
+            "texture": {
+                "tiling":0.5,
+                "detiling":1,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.532,
+                    "max":0.977,
+                    "scale":0.232
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "ice",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":3.779,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.33,
+                    "max":0.551,
+                    "scale":0.93
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":8,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":-0.016,
+                    "max":0.532,
+                    "scale":0.541
+                }
+            },
+            "transition": {
+                "underlayReveal":0,
+                "materialEdgeBlur":0,
+                "noiseSize":10,
+                "fractalDetail":3.831,
+                "noiseDetail":0.411,
+                "turbulence": 1,
+                "dominance":1,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "leafygrass",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":3.792,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.009,
+                    "max":0.18,
+                    "scale":0.883
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":3.71,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.301,
+                    "max":0.578,
+                    "scale":0.611
+                }
+            },
+            "texture_bottom": {
+                "tiling":0.5,
+                "detiling":3.71,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.301,
+                    "max":0.578,
+                    "scale":0.611
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "salt",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":2,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0,
+                    "max":0.808,
+                    "scale":0.393
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":5,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.85,
+                    "max":0.915,
+                    "scale":0.837
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "limestone",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":6,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.048,
+                    "max":0.418,
+                    "scale":0.785
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":6,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.344,
+                    "max":0.712,
+                    "scale":0.523
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        },
+        {
+            "name": "pavement",
+            "type": "hardsoft",
+            "texture_top": {
+                "tiling":0.5,
+                "detiling":1,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.532,
+                    "max":0.695,
+                    "scale":0.504
+                }
+            },
+            "texture_side": {
+                "tiling":0.5,
+                "detiling":6,
+                "hasEmissiveMask": false,
+                "emissiveStrength":0,
+                "emissiveTint": "ffffff",
+                "blend": {
+                    "min":0.344,
+                    "max":0.712,
+                    "scale":0.523
+                }
+            },
+            "transition": {
+                "underlayReveal":1,
+                "materialEdgeBlur":0.33,
+                "noiseSize":9.859,
+                "fractalDetail":2.099,
+                "noiseDetail":0.8,
+                "turbulence": 4,
+                "dominance":0,
+                "edgeDissolve":10
+            }
+        }
+    ]
+}
